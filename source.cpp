@@ -42,8 +42,18 @@ int main(int argc, char* argv[])
 			std::ifstream file(p.c_str());
 
 			// Number of lines in the file
-			int n = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
-			cout << "File line count is " << n;
+			int fileLines = count(istreambuf_iterator<char>(file), istreambuf_iterator<char>(), '\n');
+
+			// Go back to begin
+			file.clear();
+			file.seekg(0, ios::beg);
+
+			// Test: Read every line
+			string str;
+			while (getline(file, str))
+			{
+				cout << str << "\n";
+			}
 
 			// Checking additional action argument:
 			int action = STATS;
@@ -64,7 +74,10 @@ int main(int argc, char* argv[])
 				}
 			}
 
-
+			if (action == STATS || action == ALL)
+			{
+				cout << "Number of lines:\n" << fileLines;
+			}
 		}
 		else
 		{
