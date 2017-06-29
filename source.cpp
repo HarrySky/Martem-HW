@@ -25,9 +25,20 @@ int main(int argc, char **argv)
 	
 	char* filename = argv[1];
 	int action = STATS;
-	if (argc > 2 && argv[2] != STATS_ARG)
+	if (argc > 2 && argv[2] != STATS)
 	{
-
+		if (argv[2] != LIST_ARG || argv[2] != ALL_ARG)
+		{
+			cout << "Default action '--stats' selected.";
+		}
+		else
+		{
+			action = ALL;
+			if (argv[2] == LIST_ARG)
+			{
+				action = LIST;
+			}
+		}
 	}
 
 	return 0;
