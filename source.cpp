@@ -13,8 +13,13 @@ int main(int argc, char **argv)
 {
 	if (argc < 2)
 	{
-		cout << "Input file missing!";
-		cout << "Try again: " << argv[0] << " <filename>\n";
+		cout << "Input file missing!\n";
+		cout << "Try again: " << argv[0] << " <filename> --optionalArgument\n";
+		// Arguments Info:
+		cout << "--stats\nOutputs statistical information about time stamp anomalies.\n";
+		cout << "--list\nOutputs lines with erroneous time stamps along with line numbers.\n";
+		cout << "--all\nOutputs lines with erroneous time stamps along with line numbers and statistical information about time stamp anomalies.\n";
+
 		return -1;
 	}
 	
