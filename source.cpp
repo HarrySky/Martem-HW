@@ -1,5 +1,7 @@
 #include <iostream>
+#include <boost/filesystem.hpp>
 using namespace std;
+using namespace boost::filesystem;
 
 #define STATS 0
 #define LIST 1
@@ -9,7 +11,7 @@ using namespace std;
 #define LIST_ARG "--list"
 #define ALL_ARG "--all"
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
@@ -23,22 +25,34 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	
-	char* filename = argv[1];
-	int action = STATS;
-	if (argc > 2 && argv[2] != STATS)
+	path p (argv[1]);
+
+	if (!exists(p))
 	{
-		if (argv[2] != LIST_ARG || argv[2] != ALL_ARG)
+		// Checking additional action argument:
+		int action = STATS;
+		if (argc > 2 && argv[2] != STATS)
 		{
-			cout << "Default action '--stats' selected.";
-		}
-		else
-		{
-			action = ALL;
-			if (argv[2] == LIST_ARG)
+			if (argv[2] != LIST_ARG && argv[2] != ALL_ARG)
 			{
-				action = LIST;
+				cout << "Wrong action. Default action '--stats' selected instead.";
+			}
+			else
+			{
+				action = ALL;
+				if (argv[2] == LIST_ARG)
+				{
+					action = LIST;
+				}
+
 			}
 		}
+	}
+	else
+	{
+		cout << "File does not exist!\n";
+
+		return -1;
 	}
 
 	return 0;
