@@ -27,39 +27,46 @@ int main(int argc, char* argv[])
 	
 	path p (argv[1]);
 
-	if (exists(p))
+	try
 	{
-		if (!is_regular_file(p))
+		if (exists(p))
 		{
-			cout << "Not regular file provided!\n";
+			if (!is_regular_file(p))
+			{
+				cout << "Not regular file provided!\n";
+
+				return -1;
+			}
+
+			// Checking additional action argument:
+			int action = STATS;
+			if (argc > 2 && argv[2] != STATS)
+			{
+				if (argv[2] != LIST_ARG && argv[2] != ALL_ARG)
+				{
+					cout << "Wrong action. Default action '--stats' selected instead.";
+				}
+				else
+				{
+					action = ALL;
+					if (argv[2] == LIST_ARG)
+					{
+						action = LIST;
+					}
+
+				}
+			}
+		}
+		else
+		{
+			cout << "File does not exist!\n";
 
 			return -1;
 		}
-
-		// Checking additional action argument:
-		int action = STATS;
-		if (argc > 2 && argv[2] != STATS)
-		{
-			if (argv[2] != LIST_ARG && argv[2] != ALL_ARG)
-			{
-				cout << "Wrong action. Default action '--stats' selected instead.";
-			}
-			else
-			{
-				action = ALL;
-				if (argv[2] == LIST_ARG)
-				{
-					action = LIST;
-				}
-
-			}
-		}
 	}
-	else
+	catch (const filesystem_error& ex)
 	{
-		cout << "File does not exist!\n";
-
-		return -1;
+		cout << "Error occured!\n" << ex.what() << '\n';
 	}
 
 	return 0;
