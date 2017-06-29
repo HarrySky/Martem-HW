@@ -1,7 +1,9 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace std;
 using namespace boost::filesystem;
+using namespace boost::posix_time;
 
 #define STATS 0
 #define LIST 1
@@ -48,7 +50,7 @@ int main(int argc, char* argv[])
 			file.clear();
 			file.seekg(0, ios::beg);
 
-			// Test: Read every line
+			// Reading every line into vector
 			string str;
 			vector<string> lines;
 			while (getline(file, str))
@@ -56,9 +58,18 @@ int main(int argc, char* argv[])
 				lines.push_back(str);
 			}
 
-			for (vector<string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
+			// Parsing date-time
+			for (int i = 0; i < fileLines; ++i)
 			{
-				cout << *i << '\n';
+				string lineDate = lines[i].substr(0, 23);
+				const locale loc = locale(locale::classic(), new time_input_facet("%Y-%m-%d %H:%M:%S%f"));
+				istringstream is(lineDate);
+				is.imbue(loc);
+
+				ptime t;
+				is >> t;
+
+				cout << t << "\n";
 			}
 
 			// Checking additional action argument:
