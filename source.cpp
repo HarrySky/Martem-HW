@@ -27,8 +27,15 @@ int main(int argc, char* argv[])
 	
 	path p (argv[1]);
 
-	if (!exists(p))
+	if (exists(p))
 	{
+		if (!is_regular_file(p))
+		{
+			cout << "Not regular file provided!\n";
+
+			return -1;
+		}
+
 		// Checking additional action argument:
 		int action = STATS;
 		if (argc > 2 && argv[2] != STATS)
