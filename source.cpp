@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 	{
 		cout << "Input file missing!\n";
 		cout << "Try again: " << argv[0] << " <filename> --optionalArgument\n";
+		cout << "\n";
 		// Arguments Info:
 		cout << "--stats\nOutputs statistical information about time stamp anomalies.\n";
 		cout << "--list\nOutputs lines with erroneous time stamps along with line numbers.\n";
@@ -24,8 +25,8 @@ int main(int argc, char* argv[])
 
 		return -1;
 	}
-	
-	path p (argv[1]);
+
+	path p(argv[1]);
 
 	try
 	{
@@ -37,6 +38,12 @@ int main(int argc, char* argv[])
 
 				return -1;
 			}
+
+			std::ifstream file(p.c_str());
+
+			// Number of lines in the file
+			int n = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
+			cout << "File line count is " << n;
 
 			// Checking additional action argument:
 			int action = STATS;
@@ -56,6 +63,8 @@ int main(int argc, char* argv[])
 
 				}
 			}
+
+
 		}
 		else
 		{
