@@ -50,9 +50,15 @@ int main(int argc, char* argv[])
 
 			// Test: Read every line
 			string str;
+			vector<string> lines;
 			while (getline(file, str))
 			{
-				cout << str << "\n";
+				lines.push_back(str);
+			}
+
+			for (vector<string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
+			{
+				cout << *i << '\n';
 			}
 
 			// Checking additional action argument:
