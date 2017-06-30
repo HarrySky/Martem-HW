@@ -59,13 +59,11 @@ int main(int argc, char* argv[])
 
 			// Parsing date-time and checking for errors
 			const locale loc = locale(locale::classic(), new time_input_facet("%Y-%m-%d %H:%M:%s"));
-
 			ptime* lastNormalTimestamp = NULL;
-			int lastNormalTimestampLine = 1;
-
 			vector<int> invalidTimestampsLines;
+			int i, totalInvalidTimestamps = 0;
 
-			for (int i = 0; i < fileLines; ++i)
+			for (i = 0; i < fileLines; ++i)
 			{
 				// PARSING PART
 				string lineDate = lines[i].substr(0, 23);
@@ -79,8 +77,8 @@ int main(int argc, char* argv[])
 					&& (lastNormalTimestamp->time_of_day() > currentTimestamp.time_of_day()
 						|| lastNormalTimestamp->date() > currentTimestamp.date()))
 				{
-					invalidTimestampsLines.push_back(i + 1);
-					cout << "Line invalid : " << (i + 1) << "\n";
+					invalidTimestampsLines.push_back(i);
+					totalInvalidTimestamps++;
 				}
 				else
 				{
@@ -91,20 +89,19 @@ int main(int argc, char* argv[])
 
 			// Checking additional action argument:
 			int action = STATS;
-			if (argc > 2 && argv[2] != STATS)
+			if (argc > 2 && strcmp(argv[2], STATS_ARG) != 0)
 			{
-				if (argv[2] != LIST_ARG && argv[2] != ALL_ARG)
+				if (strcmp(argv[2], LIST_ARG) != 0 && strcmp(argv[2], ALL_ARG) != 0)
 				{
 					cout << "Wrong action. Default action '--stats' selected instead.";
 				}
 				else
 				{
 					action = ALL;
-					if (argv[2] == LIST_ARG)
+					if (strcmp(argv[2], LIST_ARG) == 0)
 					{
 						action = LIST;
 					}
-
 				}
 			}
 
@@ -113,14 +110,65 @@ int main(int argc, char* argv[])
 				cout << "Number of lines:\n" << fileLines << "\n";
 				cout << "Invalid time stamps at line(s):\n";
 
-				// Showing line numbers here
+				bool isRange = false;
+				string output;
+				for (i = 0; i < totalInvalidTimestamps; ++i)
+				{
+					// Starting point ("x")
+					if (!isRange)
+					{
+						output = to_string(invalidTimestampsLines[i] + 1);
+					}
+
+					// Check if next line number is next to this to form a range ("x-")
+					if (i + 1 != totalInvalidTimestamps && !isRange
+						&& invalidTimestampsLines[i + 1] + 1 == invalidTimestampsLines[i] + 2)
+					{
+						isRange = true;
+						output += "-";
+					}
+
+					if (isRange)
+					{
+						// Check if there is no more line numbers in this range to close it ("x-y")
+						if (i + 1 == totalInvalidTimestamps || invalidTimestampsLines[i + 1] + 1 != invalidTimestampsLines[i] + 2)
+						{
+							output += to_string(invalidTimestampsLines[i] + 1);
+							isRange = false;
+						}
+						else { continue; }
+					}
+
+					cout << output << "\n";
+				}
 
 				cout << "\n";
 			}
 
 			if (action == LIST || action == ALL)
 			{
-				// Showing lines here
+				int currentInvalidTimestampLine;
+				for (i = 0; i < totalInvalidTimestamps; ++i)
+				{
+					currentInvalidTimestampLine = invalidTimestampsLines[i];
+					// Normal entry before the invalid timestamp
+					if (currentInvalidTimestampLine > 0
+						&& (i == 0 || invalidTimestampsLines[i - 1] != currentInvalidTimestampLine - 1))
+					{
+						cout << "[" << currentInvalidTimestampLine << "] " + lines[currentInvalidTimestampLine - 1] << "\n";
+					}
+
+					// Invalid timestamp entry
+					cout << "[" << currentInvalidTimestampLine + 1 << "] " + lines[currentInvalidTimestampLine] << "\n";
+
+					// Normal entry after invalid timestamp
+					if (currentInvalidTimestampLine + 1 < fileLines
+						&& (i + 1 == totalInvalidTimestamps || invalidTimestampsLines[i + 1] != currentInvalidTimestampLine + 1))
+					{
+						cout << "[" << currentInvalidTimestampLine + 2 << "] " + lines[currentInvalidTimestampLine + 1] << "\n";
+						cout << "---" << "\n";
+					}
+				}
 			}
 		}
 		else
@@ -136,7 +184,6 @@ int main(int argc, char* argv[])
 
 		return -1;
 	}
-
 
 	return 0;
 }
