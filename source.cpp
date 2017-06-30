@@ -17,10 +17,11 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
+		// If no input file argument provided - error
 		cout << "Input file missing!\n";
 		cout << "Try again: " << argv[0] << " <filename> --optionalArgument\n";
 		cout << "\n";
-		// Arguments Info:
+		// Arguments info:
 		cout << "--stats\nOutputs statistical information about time stamp anomalies.\n";
 		cout << "--list\nOutputs lines with erroneous time stamps along with line numbers.\n";
 		cout << "--all\nOutputs lines with erroneous time stamps along with line numbers and statistical information about time stamp anomalies.\n";
@@ -28,10 +29,9 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	path p(argv[1]);
-
 	try
 	{
+		path p(argv[1]);
 		if (exists(p))
 		{
 			if (!is_regular_file(p))
@@ -41,12 +41,11 @@ int main(int argc, char* argv[])
 				return -1;
 			}
 
+			// Open file after checking that it exists and is regular
 			std::ifstream file(p.c_str());
+			long fileLines = count(istreambuf_iterator<char>(file), istreambuf_iterator<char>(), '\n') + 1;
 
-			// Number of lines in the file
-			int fileLines = count(istreambuf_iterator<char>(file), istreambuf_iterator<char>(), '\n');
-
-			// Go back to begin
+			// Go back to beginning of file
 			file.clear();
 			file.seekg(0, ios::beg);
 
@@ -58,18 +57,36 @@ int main(int argc, char* argv[])
 				lines.push_back(str);
 			}
 
-			// Parsing date-time
+			// Parsing date-time and checking for errors
+			const locale loc = locale(locale::classic(), new time_input_facet("%Y-%m-%d %H:%M:%s"));
+
+			ptime* lastNormalTimestamp = NULL;
+			int lastNormalTimestampLine = 1;
+
+			vector<int> invalidTimestampsLines;
+
 			for (int i = 0; i < fileLines; ++i)
 			{
+				// PARSING PART
 				string lineDate = lines[i].substr(0, 23);
-				const locale loc = locale(locale::classic(), new time_input_facet("%Y-%m-%d %H:%M:%S%f"));
 				istringstream is(lineDate);
 				is.imbue(loc);
+				ptime currentTimestamp;
+				is >> currentTimestamp;
 
-				ptime t;
-				is >> t;
-
-				cout << t << "\n";
+				// ERROR CHECKING PART
+				if (lastNormalTimestamp != NULL
+					&& (lastNormalTimestamp->time_of_day() > currentTimestamp.time_of_day()
+						|| lastNormalTimestamp->date() > currentTimestamp.date()))
+				{
+					invalidTimestampsLines.push_back(i + 1);
+					cout << "Line invalid : " << (i + 1) << "\n";
+				}
+				else
+				{
+					free(lastNormalTimestamp);
+					lastNormalTimestamp = new ptime(currentTimestamp);
+				}
 			}
 
 			// Checking additional action argument:
@@ -93,7 +110,17 @@ int main(int argc, char* argv[])
 
 			if (action == STATS || action == ALL)
 			{
-				cout << "Number of lines:\n" << fileLines;
+				cout << "Number of lines:\n" << fileLines << "\n";
+				cout << "Invalid time stamps at line(s):\n";
+
+				// Showing line numbers here
+
+				cout << "\n";
+			}
+
+			if (action == LIST || action == ALL)
+			{
+				// Showing lines here
 			}
 		}
 		else
@@ -106,7 +133,10 @@ int main(int argc, char* argv[])
 	catch (const filesystem_error& ex)
 	{
 		cout << "Error occured!\n" << ex.what() << '\n';
+
+		return -1;
 	}
+
 
 	return 0;
 }
