@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-int checkTSForErrors(int fileLinesAmount, vector<string> lines, vector<int> *invalidTimestampsLines)
+int checkTSForErrors(int fileLinesAmount, vector<string> linesVector, vector<int> *invalidTimestampsLines)
 {
 	const locale loc = locale(locale::classic(), new time_input_facet("%Y-%m-%d %H:%M:%s"));
 	ptime* lastNormalTimestamp = NULL;
@@ -107,7 +107,7 @@ int checkTSForErrors(int fileLinesAmount, vector<string> lines, vector<int> *inv
 	for (i = 0; i < fileLinesAmount; ++i)
 	{
 		// PARSING PART
-		string lineDate = lines[i].substr(0, 23);
+		string lineDate = linesVector[i].substr(0, 23);
 		istringstream is(lineDate);
 		is.imbue(loc);
 		is >> currentTimestamp;
@@ -168,7 +168,7 @@ void showStats(int fileLinesAmount, vector<int> invalidTimestampsLines, int tota
 	cout << "\n";
 }
 
-void showList(int fileLinesAmount, vector<string> lines, vector<int> invalidTimestampsLines, int totalInvalidTimestamps)
+void showList(int fileLinesAmount, vector<string> linesVector, vector<int> invalidTimestampsLines, int totalInvalidTimestamps)
 {
 	int i, currentInvalidTimestampLine;
 	for (i = 0; i < totalInvalidTimestamps; ++i)
@@ -179,17 +179,17 @@ void showList(int fileLinesAmount, vector<string> lines, vector<int> invalidTime
 		if (currentInvalidTimestampLine > 0
 			&& (i == 0 || invalidTimestampsLines[i - 1] != currentInvalidTimestampLine - 1))
 		{
-			cout << "[" << currentInvalidTimestampLine << "] " + lines[currentInvalidTimestampLine - 1] << "\n";
+			cout << "[" << currentInvalidTimestampLine << "] " + linesVector[currentInvalidTimestampLine - 1] << "\n";
 		}
 
 		// Invalid timestamp entry
-		cout << "[" << currentInvalidTimestampLine + 1 << "] " + lines[currentInvalidTimestampLine] << "\n";
+		cout << "[" << currentInvalidTimestampLine + 1 << "] " + linesVector[currentInvalidTimestampLine] << "\n";
 
 		// Normal entry after invalid timestamp
 		if (currentInvalidTimestampLine + 1 < fileLinesAmount
 			&& (i + 1 == totalInvalidTimestamps || invalidTimestampsLines[i + 1] != currentInvalidTimestampLine + 1))
 		{
-			cout << "[" << currentInvalidTimestampLine + 2 << "] " + lines[currentInvalidTimestampLine + 1] << "\n";
+			cout << "[" << currentInvalidTimestampLine + 2 << "] " + linesVector[currentInvalidTimestampLine + 1] << "\n";
 			cout << "---" << "\n";
 		}
 	}
