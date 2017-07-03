@@ -4,11 +4,11 @@
 
 if [ "$1" = "" ]
 then
-	TOTAL=$((`awk '/MemTotal/ {print $2 / 1024 }' /proc/meminfo`))
-	FREE=$((`awk '/MemFree/ {print $2 / 1024 }' /proc/meminfo`))
+	TOTAL=$((`awk '/MemTotal/ {print $2}' /proc/meminfo | sed s/...$//`))
+	FREE=$((`awk '/MemFree/ {print $2}' /proc/meminfo | sed s/...$//`))
 else
-	TOTAL=$((`awk '/MemTotal/ {print $2 / 1024 }' $1`))
-	FREE=$((`awk '/MemFree/ {print $2 / 1024 }' $1`))
+	TOTAL=$((`awk '/MemTotal/ {print $2}' $1 | sed s/...$//`))
+	FREE=$((`awk '/MemFree/ {print $2}' $1 | sed s/...$//`))
 fi
 
 USED=$((TOTAL - FREE))
